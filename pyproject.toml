@@ -1,0 +1,22 @@
+[project]
+name = "absp"
+version = "0.1.0"
+description = "Asynchronous Backend Store Package"
+requires-python = ">=3.14"
+
+# dependencies needed by the ci
+dependencies = ["black",
+                "pycodestyle",
+                "pydocstyle",
+                "pytest",
+                "pytest-asyncio",
+                "pytest-html",
+                "ruff",
+                "bandit",
+                "sphinx",
+                "furo",
+                "coverage"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
