@@ -10,7 +10,7 @@ class IAbsp:
     Attribute
     ---------
     mapper_: dict
-        The mapper of the package interface
+        The mapper of the absp package interface
 
     Methods
     -------
@@ -18,7 +18,7 @@ class IAbsp:
         Set the init state of object with a mapper
 
     get(_earc,*args)
-        create the needed warehouse asynchronously.
+        create the needed store asynchronously.
     """
 
     def __init__(self, _mapper=PMPR):
@@ -32,7 +32,7 @@ class IAbsp:
         self.mapper_ = _mapper
 
     async def get(self, _interface : str, *args) -> object:
-        """Instance the warehouse asynchronously.
+        """Instance the store asynchronously.
 
         Parameter
         ---------
