@@ -1,35 +1,25 @@
 """iabsp module."""
 
-# PMPR={"inmemory":,
-#       "db":,
-#       "datalake":}
+from functools import partial
 
 class IAbsp:
     """Interface to create & use absp store packages.
 
-    Attribute
-    ---------
-    mapper_: dict
-        The mapper of the absp package interface
-
     Methods
     -------
-    __init__(_mapper)
-        Set the init state of object with a mapper
+    __init__()
+        Set the init state of object
 
     get(_earc,*args)
         create the needed store asynchronously.
     """
 
-    def __init__(self, _mapper=PMPR):
-        """Initialiaze the object state with a mapper.
+    def __init__(self):
+        """Initialize the store mapper with database factory methods."""
+        from absp.db.edb import EDb
+        from absp.db.idb import IDb
 
-        Parameters
-        ----------
-        _mapper:
-            The mapper of the package interface
-        """
-        self.mapper_ = _mapper
+        self.mapper_ = {"mongo": partial(IDb().get, EDb.MGDB)}
 
     async def get(self, _interface : str, *args) -> object:
         """Instance the store asynchronously.
