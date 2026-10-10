@@ -2,7 +2,6 @@
 
 from absp.db.edb import EDb
 from absp.db.dbmpr import DBMPR
-from absp.db.amongodb_mock import AMongoDbMock
 
 class IDb:
     """Interface to create & use awhe objects.
@@ -47,6 +46,4 @@ class IDb:
         KeyError
             if the key doesn't exist
         """
-
-        #__import__('pdb').set_trace()
         return await self.mapper_[_edb](*args)

@@ -8,5 +8,7 @@ from absp.db.amongodb_mock import AMongoDbMock
 DBMPR = {
     EDb.MGDB: AMongoDbMock,
 }
+
+#   EDb.MGDB: AMongoDb,
 #   EDb.PGRES: APostGreSql,
 #   EDb.SQLE: ASqlite,
