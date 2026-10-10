@@ -50,6 +50,7 @@ python -c "import absp; print(absp.__file__)"
 
 ```text
 pyproject.toml       Package metadata, dependencies, and build configuration
+local-ci.sh         Local test execution and HTML report generation
 src/absp/           Main Python package
     datalake/       Data lake package skeleton
     db/             Database package skeleton
@@ -58,6 +59,17 @@ tests/              Directory for future tests
 ```
 
 ## Development
+
+Before pushing a branch, activate the virtual environment and execute
+`local-ci.sh` from the repository root:
+
+```bash
+bash local-ci.sh
+```
+
+The script runs pytest and generates a self-contained HTML report at
+`reports/report.html`, creating the `reports/` directory if needed. Review the
+report and resolve test failures before pushing.
 
 Once tests are added, run them from the repository root with:
 
