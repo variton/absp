@@ -1,7 +1,7 @@
 """iinmemory module."""
 
-from absp.db.einmemory import EInMemory
-from absp.db.inmemorympr import INMEMORYMPR
+from absp.inmemory.einmemory import EInMemory
+from absp.inmemory.inmemorympr import INMEMORYMPR
 
 class IInMemory:
     """Interface to create & use inmemory objects.
