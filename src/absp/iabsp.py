@@ -18,8 +18,11 @@ class IAbsp:
         """Initialize the store mapper with database factory methods."""
         from absp.db.edb import EDb
         from absp.db.idb import IDb
+        from absp.inmemory.einmemory import EInMemory
+        from absp.inmemory.iinmemory import IInMemory
 
-        self.mapper_ = {"mongo": partial(IDb().get, EDb.MGDB)}
+        self.mapper_ = {"mongo": partial(IDb().get, EDb.MGDB),
+                        "redis": partial(IInMemory().get, EInMemory.REDIS)}
 
     async def get(self, _interface : str, *args) -> object:
         """Instance the store asynchronously.
