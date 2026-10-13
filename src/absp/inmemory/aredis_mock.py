@@ -11,12 +11,12 @@ class ARedisMock(AsyncObject):
     """
     A class that implements the interfaces exposed by the async redis driver.
     """
-    async def __ainit__(self,_url:str="", _inm_name: str=""):
+    async def __ainit__(self,_host:str="localhost", _port:int=6379):
         print("") 
-        if _url != "" :
-            print(_url)
-        if _inm_name != "":
-            print(_inm_name)
+        if _host:
+            print(_host)
+        if _port:
+            print(_port)
 
     async def connect(self) -> bool:
         """
@@ -26,5 +26,5 @@ class ARedisMock(AsyncObject):
         -------
             Indicate if the connection to REDIS was made.
         """
-        print("connecting ot mongodb")
+        print("connecting to redis")
         return True
