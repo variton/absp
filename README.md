@@ -10,15 +10,19 @@ storage.
 
 ## Project Status
 
-The package currently provides asynchronous store factories (`IAbsp` and `IDb`)
-and a MongoDB mock (`AMongoDbMock`). The mock prints connection information and
-returns `True` from `connect()`; it does not connect to a database or implement
-data persistence.
+The package currently provides asynchronous store factories (`IAbsp`, `IDb`,
+and `IInMemory`) and mocks for MongoDB (`AMongoDbMock`) and Redis (`ARedisMock`).
+Both mocks print connection information and return `True` from `connect()`;
+they do not connect to a server or implement data persistence.
 
-Only MongoDB is mapped to an implementation. PostgreSQL and SQLite have enum
-values but no implementations, and the `datalake` and `inmemory` subpackages
-remain skeletons. Two asynchronous tests exercise the MongoDB mock through the
-store and database factories.
+| Store key | Backend factory | Backend enum | Implementation |
+| --- | --- | --- | --- |
+| `"mongo"` | `IDb` | `EDb.MGDB` | `AMongoDbMock` |
+| `"redis"` | `IInMemory` | `EInMemory.REDIS` | `ARedisMock` |
+
+PostgreSQL, SQLite, Dragonfly, and Aerospike have enum values but no mapped
+implementations. The `datalake` subpackage remains a skeleton. Four asynchronous
+tests exercise both mocks through the store and backend-specific factories.
 
 ## Requirements
 
@@ -77,10 +81,34 @@ asyncio.run(main())
 ```
 
 The URL and database name are printed by the mock; no running MongoDB server is
-required. You can also create it with
-`await IDb().get(EDb.MGDB, url, database_name)`, importing `IDb` from
-`absp.db.idb` and `EDb` from `absp.db.edb`. Unsupported store names or unmapped
-database enum values raise `KeyError`.
+required. The MongoDB mock accepts an optional third argument for models.
+
+To use the Redis mock, replace the store creation line with:
+
+```python
+store = await IAbsp().get("redis", "localhost", 6379)
+```
+
+Redis defaults to host `"localhost"` and port `6379`, so
+`await IAbsp().get("redis")` also works. Its host and port are printed by the
+mock; no running Redis server is required. Use the same `connect()` and `close()`
+lifecycle as in the MongoDB example.
+
+You can also create either mock through its backend-specific factory:
+
+```python
+from absp.db.edb import EDb
+from absp.db.idb import IDb
+from absp.inmemory.einmemory import EInMemory
+from absp.inmemory.iinmemory import IInMemory
+
+# Inside an async function:
+mongo = await IDb().get(EDb.MGDB, "http://localhost:2456", "neo")
+redis = await IInMemory().get(EInMemory.REDIS, "localhost", 6379)
+```
+
+Close each mock with `await mock.close()` after use. Unsupported store names or
+unmapped backend enum values raise `KeyError`.
 
 ## Repository Layout
 
@@ -88,11 +116,11 @@ database enum values raise `KeyError`.
 pyproject.toml       Package metadata, dependencies, and build configuration
 local-ci.sh         Local test execution and HTML report generation
 src/absp/           Main Python package
-    iabsp.py        Asynchronous store factory ("mongo")
+    iabsp.py        Asynchronous store factory ("mongo" and "redis")
     datalake/       Data lake package skeleton
     db/             Database factory, backend enum, mapper, and MongoDB mock
-    inmemory/       In-memory storage package skeleton
-tests/              Asynchronous factory and mock connection tests
+    inmemory/       In-memory factory, backend enum, mapper, and Redis mock
+tests/              Four asynchronous factory and mock connection tests
 reports/            Generated test reports (report.html is ignored by Git)
 ```
 
@@ -116,4 +144,4 @@ python -m pytest
 ```
 
 Run these commands in the activated environment after installing the package
-and `async-class`. The tests use the MongoDB mock and require no database server.
+and `async-class`. The tests use MongoDB and Redis mocks and require no servers.
