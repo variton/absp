@@ -1,6 +1,6 @@
+"""idatalake module."""
 
 from absp.fmk.istorage import IStorage
-from absp.datalake.edatalake import EDataLake
 from absp.datalake.datalakempr import DATALAKEMPR
 
 class IDataLake(IStorage):
