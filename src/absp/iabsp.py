@@ -20,9 +20,12 @@ class IAbsp:
         from absp.db.idb import IDb
         from absp.inmemory.einmemory import EInMemory
         from absp.inmemory.iinmemory import IInMemory
+        from absp.datalake.idatalake import IDataLake
+        from absp.datalake.edatalake import EDataLake
 
         self.mapper_ = {"mongo": partial(IDb().get, EDb.MGDB),
-                        "redis": partial(IInMemory().get, EInMemory.REDIS)}
+                        "redis": partial(IInMemory().get, EInMemory.REDIS),
+                        "s3": partial(IDataLake().get, EDataLake.S3)}
 
     async def get(self, _interface : str, *args) -> object:
         """Instance the store asynchronously.

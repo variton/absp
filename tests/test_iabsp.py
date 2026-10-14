@@ -21,3 +21,10 @@ async def test_iabsp_get_redis(iabsp):
     res = await aredis_mock.connect()
     assert res
     await aredis_mock.close()
+
+@pytest.mark.asyncio
+async def test_iabsp_get_s3(iabsp):
+    as3_mock = await iabsp.get("s3","x-bucket")
+    res = await as3_mock.connect()
+    assert res
+    await as3_mock.close()
