@@ -1,4 +1,4 @@
-"""aredis module."""
+"""redis module."""
 
 from typing import Any
 
@@ -10,43 +10,6 @@ class ARedis(AsyncObject):
     """
     A class to give access to Redis in-memory storage.
 
-    Attributes
-    ----------
-    client_ : aioredis.Redis
-        The aioredis client object.
-
-    Methods
-    -------
-    __ainit__(*args)
-        Initialize the RedisAwhe class asynchronously.
-
-    connect() -> bool
-        Not implemented. Connection is established in __ainit__.
-
-    insert(**kwargs) -> None
-        Insert data into the Redis storage.
-
-    find(_key: Any) -> bool
-        Find data for a given key in Redis.
-
-    get(_key: Any) -> Any
-        Get data for a given key from Redis.
-
-    update(**kwargs) -> None
-        Update the value of data for a given key in Redis.
-
-    delete(_key: Any) -> None
-        Delete data for a given key from Redis.
-
-    count() -> int
-        Count the number of elements in the Redis storage.
-
-    flush() -> bool
-        Flush all the data stored in redis.
-
-    search(_pattern:str) -> Any
-        Search for all exists keys for a define pattern.
-
     """
 
     async def __ainit__(self,host:str,port:int,decode:bool=True) -> None:
@@ -55,8 +18,11 @@ class ARedis(AsyncObject):
         self.decode_ = decode
         self.client_ = None
 
-    async def connect(self) -> None:  # pragma: no cover
-        pass
+    async def connect(self) -> object:
+        self.client_ = redis.Redis(host=self.host_, 
+                                   port=self.port_, 
+                                   decode_responses=self.decode_)
+        return self.client_ 
 
     async def insert(self, **kwargs: Any) -> None:
         """
@@ -72,31 +38,18 @@ class ARedis(AsyncObject):
         """
         await self.client_.set(kwargs["Key"], kwargs["Value"])
 
-    async def find(self, _key: str) -> bool:
+    async def find(self, key: str) -> bool:
         """
         Find a given key in Redis.
 
-        Parameters
-        ----------
-        _key : str
-            The key to be found.
-
-        Returns
-        -------
-        bool
-            True if the key is found, False otherwise.
         """
-        l_num = await self.client_.exists(_key)
-        return l_num != 0
+        num = await self.client_.exists(key)
+        return num != 0
 
-    async def get(self, _key: str) -> Any:
+    async def get(self, key: str) -> object:
         """
         Get data for a given key from Redis.
 
-        Parameters
-        ----------
-        _key : str
-            The key for the data to be retrieved.
         """
         return await self.client_.get(_key)
 
@@ -104,7 +57,7 @@ class ARedis(AsyncObject):
         """Not implemented for this class."""
         pass
 
-    async def replace(self, _key: str, _value: Any) -> None:
+    async def replace(self, key: str, value: object) -> None:
         """
         Replace the value of data for a given key in Redis.
 
@@ -115,27 +68,19 @@ class ARedis(AsyncObject):
         _value : Any
             The value for the new data to set.
         """
-        await self.client_.set(_key, _value)
+        await self.client_.set(key,value)
 
-    async def delete(self, *_keys: str) -> None:
+    async def delete(self, *keys: str) -> None:
         """
         Delete data for one key or multiple keys from Redis.
 
-        Parameters
-        ----------
-        *_keys : str
-            The key(s) for the data to be deleted.
         """
-        await self.client_.delete(*_keys)
+        await self.client_.delete(*keys)
 
     async def count(self) -> int:
         """
         Count the number of elements in the Redis storage.
 
-        Returns
-        -------
-        int
-            The number of elements in the Redis storage.
         """
         return await self.client_.dbsize()
 
@@ -149,20 +94,17 @@ class ARedis(AsyncObject):
             Return true if the operation succeded.
 
         """
-        l_number_of_objs = await self.count()
-        if l_number_of_objs > 0:
+        number_of_objs = await self.count()
+        if number_of_objs > 0:
             await self.client_.flushall()
             return True
         return False
 
     # todo write unit tests
-    async def search(self, _pattern: str) -> Any:
+    async def search(self, pattern: str) -> Any:
         """
         Search for all exists keys for a define pattern.
 
-        Returns
-        -------
-        Any
             Return a value or list of values.
         """
-        return await self.client_.keys(_pattern)
+        return await self.client_.keys(pattern)
