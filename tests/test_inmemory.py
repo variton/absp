@@ -11,7 +11,7 @@ def iinmemory():
 
 @pytest.mark.asyncio
 async def test_iinmemory_get(iinmemory):
-    aredis_mock = await iinmemory.get(EInMemory.REDIS)
+    aredis_mock = await iinmemory.get(EInMemory.RMOCK)
     res = await aredis_mock.connect()
     assert res
     await aredis_mock.close()

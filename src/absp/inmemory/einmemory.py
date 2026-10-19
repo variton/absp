@@ -11,3 +11,5 @@ class EInMemory(Enum):
     """DRFLY refers to dragonfly."""
     AEROS = 2
     """AEROS refers to aerospike."""
+    RMOCK = 3
+    """RMOCK refers to aredis_mock."""

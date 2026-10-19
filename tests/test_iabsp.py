@@ -17,10 +17,10 @@ async def test_iabsp_get_mongo(iabsp):
 
 @pytest.mark.asyncio
 async def test_iabsp_get_redis(iabsp):
-    aredis_mock = await iabsp.get("redis")
-    res = await aredis_mock.connect()
+    aredis = await iabsp.get("redis","localhost", 6379)
+    res = await aredis.connect()
     assert res
-    await aredis_mock.close()
+    await aredis.close()
 
 @pytest.mark.asyncio
 async def test_iabsp_get_s3(iabsp):
