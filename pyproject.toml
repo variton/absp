@@ -23,6 +23,7 @@ dev = [
     "sphinx",
     "furo",
     "coverage",
+    "ipdb",
 ]
 
 [build-system]
