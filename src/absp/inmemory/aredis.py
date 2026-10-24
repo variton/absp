@@ -31,12 +31,9 @@ class ARedis(AsyncObject):
         Parameters
         ----------
         **kwargs : dict
-            Key : str
-                The key for the data to be set.
-            Value : Any
-                The value for the data to be set.
         """
-        await self.client_.set(kwargs["Key"], kwargs["Value"])
+        key, value = next(iter(kwargs.items())) 
+        await self.client_.set(key,value)
 
     async def find(self, key: str) -> bool:
         """
