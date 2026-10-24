@@ -10,7 +10,7 @@
 __pycache__/
 htmlcov/
 docs/_build/
-
+*.egg-info/
 #files to ignore
 .coverage
 coverage.json
