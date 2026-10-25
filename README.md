@@ -1,45 +1,54 @@
 # Asynchronous Backend Store Package (ABSP)
 
-ABSP is a Python package under development for creating asynchronous database,
-in-memory, and data lake stores through a common factory.
+ABSP is a Python package under development for creating asynchronous storage
+adapters through a common factory. It currently includes a Redis adapter and
+connection mocks for MongoDB, Redis, and Amazon S3.
 
-## Available Backends
+## Available backends
 
-| Store key | Backend factory | Backend enum | Implementation |
+Use `await IAbsp().get(key, *args)` to create an adapter:
+
+| Store key | Implementation | Constructor arguments | External service |
 | --- | --- | --- | --- |
-| `"mongo"` | `IDb` | `EDb.MGDB` | `AMongoDbMock` |
-| `"redis"` | `IInMemory` | `EInMemory.REDIS` | `ARedis` |
-| `"rmock"` | `IInMemory` | `EInMemory.RMOCK` | `ARedisMock` |
-| `"s3"` | `IDataLake` | `EDataLake.S3` | `AS3Mock` |
+| `"mongo"` | `AMongoDbMock` | URL, database name, optional models | None (mock) |
+| `"rmock"` | `ARedisMock` | Host (default `"localhost"`), port (default `6379`) | None (mock) |
+| `"redis"` | `ARedis` | Host, port, optional decode flag (default `True`) | Redis |
+| `"s3"` | `AS3Mock` | Bucket name, optional client | None (mock) |
 
-The MongoDB, Redis mock, and S3 implementations print connection information
-and return `True` from `connect()`. They do not connect to servers or persist
-data. The `"redis"` backend uses `redis.asyncio` to access a real Redis server.
+The mocks print connection information and return `True` from `connect()`;
+they do not persist data. The Redis adapter uses `redis.asyncio` and exposes
+operations including `insert`, `find`, `replace`, `delete`, `count`, and `search`.
 
-PostgreSQL, SQLite, Dragonfly, Aerospike, Google Cloud Storage, Azure Data Lake
-Storage, and HDFS have enum values but no mapped implementations. Unsupported
-store keys or unmapped backend enum values raise `KeyError`.
+PostgreSQL, SQLite, Dragonfly, Aerospike, GCS, ADLS, and HDFS have enum values
+but no mapped implementations. Unsupported store keys and unmapped enum values
+raise `KeyError`. The backend-specific factory and enum pairs are `IDb` /
+`EDb.MGDB` for MongoDB, `IInMemory` / `EInMemory.REDIS` or
+`EInMemory.RMOCK` for Redis, and `IDataLake` / `EDataLake.S3` for S3.
 
-## Getting Started
+## Setup
 
-Python **3.14 or newer** and [uv](https://docs.astral.sh/uv/) are required for
-the setup below. From the repository root:
+Requirements: **Python 3.14 or newer**, Git (for the `xphide` dependency), and
+`uv`. Run these commands from the repository root:
 
 ```bash
-uv sync
+uv sync --locked
 uv run python -c "import absp; print(absp.__file__)"
 ```
 
-`uv sync` installs the package, runtime dependencies (`async-class`, `redis`,
-and `xphide`), and the default development dependency group. The `xphide`
-dependency is sourced from its Git repository at tag `v0.1.0`, as configured in
-`pyproject.toml`.
+`uv sync` creates a project virtual environment and installs the package and
+the default `dev` dependency group using `uv.lock`. Runtime dependencies are
+`async-class`, `redis`, and `xphide`. The `xphide` source is configured in
+`pyproject.toml` as a Git dependency pinned to tag `v0.1.0`.
 
-## Usage
+To install without development tools:
 
-### Mock stores
+```bash
+uv sync --locked --no-dev
+```
 
-This example requires no external services:
+## Quick start: no server required
+
+Save this example as `example.py` and run it with `uv run python example.py`:
 
 ```python
 import asyncio
@@ -48,7 +57,7 @@ from absp.iabsp import IAbsp
 
 
 async def main():
-    store = await IAbsp().get("mongo", "mongodb://localhost:27017", "example")
+    store = await IAbsp().get("rmock")
     try:
         connected = await store.connect()
         print(connected)  # True: this is a mock connection.
@@ -59,21 +68,19 @@ async def main():
 asyncio.run(main())
 ```
 
-Use either of these factory calls inside an async function for the other mocks:
+To try another mock, replace the store creation line with either:
 
 ```python
-redis_mock = await IAbsp().get("rmock")  # Defaults to localhost:6379.
-s3_mock = await IAbsp().get("s3", "example-bucket")
+store = await IAbsp().get("mongo", "mongodb://localhost:27017", "example")
+store = await IAbsp().get("s3", "example-bucket")
 ```
 
-Each mock supports the same `connect()` and `close()` lifecycle. The MongoDB
-mock also accepts an optional third argument for models; the S3 mock accepts
-an optional client argument after the bucket name.
+The mock arguments are only used for printed connection information. No MongoDB
+server, AWS credentials, or S3 bucket is required.
 
-### Redis
+## Using Redis
 
-The real Redis backend requires a host and port. `connect()` returns an
-asynchronous Redis client; use `ping()` to verify that the server is reachable.
+Start a Redis server reachable at `localhost:6379`, then run this example:
 
 ```python
 import asyncio
@@ -86,9 +93,10 @@ async def main():
     client = await store.connect()
     try:
         await client.ping()
-        await store.insert(**{"example:message": "hello"})
-        print(await client.get("example:message"))
-        await store.delete("example:message")
+        await store.insert(**{"absp:example": "hello"})
+        print(await store.find("absp:example"))  # True
+        print(await client.get("absp:example"))  # hello
+        await store.delete("absp:example")
     finally:
         await client.aclose()
         await store.close()
@@ -97,76 +105,84 @@ async def main():
 asyncio.run(main())
 ```
 
-The Redis wrapper provides `insert`, `find`, `replace`, `delete`, `count`,
-`flush`, and `search`. It is still incomplete: `update()` is a no-op and
-`get()` currently references an undefined variable. Use the returned client's
-`get()` method, as above. `insert()` writes only the first keyword argument;
-`flush()` calls Redis `FLUSHALL`, clearing all databases on the server.
+`connect()` returns a Redis client; it does not verify connectivity. The first
+command, such as `ping()`, contacts the server. Pass `False` as the third factory
+argument to receive bytes instead of decoded strings.
 
-### Backend-specific factories
+The Redis adapter is incomplete: `get(key)` currently references an undefined
+variable, and `update()` is a no-op. Use the returned client's `get(key)` to read
+values, as above. `insert()` writes only the first keyword argument.
+`flush()` calls Redis `FLUSHALL` when the selected database is
+nonempty, so it can remove data across all databases on the server.
 
-You can also create stores directly through the corresponding factory:
+## Backend-specific factories
+
+The top-level factory delegates to factories that can also be used directly.
+Inside an async function:
 
 ```python
+from absp.datalake.edatalake import EDataLake
+from absp.datalake.idatalake import IDataLake
 from absp.db.edb import EDb
 from absp.db.idb import IDb
 from absp.inmemory.einmemory import EInMemory
 from absp.inmemory.iinmemory import IInMemory
-from absp.datalake.edatalake import EDataLake
-from absp.datalake.idatalake import IDataLake
 
-# Inside an async function:
 mongo = await IDb().get(EDb.MGDB, "mongodb://localhost:27017", "example")
 redis_mock = await IInMemory().get(EInMemory.RMOCK)
 s3 = await IDataLake().get(EDataLake.S3, "example-bucket")
 ```
 
-Close each store after use with `await store.close()`.
+Close each adapter with `await adapter.close()` after use. For a real Redis
+connection, also close the returned client with `await client.aclose()`.
 
-## Development
+## Development and tests
 
-Run the tests and generate a self-contained HTML report:
+Install development dependencies with `uv sync --locked`. To run only the mock
+tests, without any external services:
 
 ```bash
-uv run bash local-ci.sh
+uv run pytest tests/test_idb.py tests/test_idatalake.py tests/test_inmemory.py tests/test_iabsp.py::test_iabsp_get_mongo tests/test_iabsp.py::test_iabsp_get_s3
 ```
 
-The script creates `reports/` if needed and writes `reports/report.html`.
-To run tests without generating a report:
+The full suite includes Redis tests that connect to `localhost:6379` and write
+data. Use a disposable Redis instance:
 
 ```bash
 uv run pytest
 ```
 
-The full suite includes a Redis insertion test that requires a running Redis
-server at `localhost:6379`. To run only tests using mock backends:
+Generate a self-contained HTML report at `reports/report.html`:
 
 ```bash
-uv run pytest tests/test_idb.py tests/test_inmemory.py tests/test_idatalake.py tests/test_iabsp.py -k 'not redis'
+uv run bash local-ci.sh
 ```
 
-Additional sequential and concurrent store-launch tests are in `nrtests/`:
+The script creates `reports/` if needed. The generated report is ignored by Git.
+The `nrtests/` directory contains additional sequential and concurrent store
+creation tests; pytest's default discovery includes these tests as well.
+To run them separately:
 
 ```bash
 uv run pytest nrtests
 ```
 
-These construct a real Redis client, but do not verify server connectivity
+These tests construct a real Redis client but do not verify server connectivity
 with a Redis command.
 
-## Repository Layout
+## Repository layout
 
 ```text
-pyproject.toml       Package metadata, dependency groups, and build configuration
-uv.lock              Locked dependencies
-local-ci.sh          Pytest execution and HTML report generation
+pyproject.toml       Package metadata, dependencies, and build configuration
+uv.lock              Locked dependency versions
+local-ci.sh          Pytest runner with HTML report generation
 src/absp/
-    iabsp.py         Store factory (mongo, redis, rmock, and s3)
+    iabsp.py         Top-level store factory
     fmk/             Shared storage factory base class
-    db/              Database factory, backend enum, mapper, and MongoDB mock
-    inmemory/        In-memory factory, Redis client, and Redis mock
-    datalake/        Data lake factory, backend enum, mapper, and S3 mock
+    datalake/        Data lake factory, backend enum, and S3 mock
+    db/              Database factory, backend enum, and MongoDB mock
+    inmemory/        In-memory factory, backend enum, Redis adapter and mock
 tests/               Factory, mock, and Redis tests
-nrtests/             Sequential and concurrent store-launch tests
-reports/             Generated test reports (report.html is ignored by Git)
+nrtests/             Sequential and concurrent store creation tests
+reports/             Generated test reports
 ```
