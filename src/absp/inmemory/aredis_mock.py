@@ -1,4 +1,5 @@
 """aredis_mock module."""
+
 # multiple model mongo-db asynchronous store
 
 import os
@@ -7,12 +8,14 @@ from typing import Any, List
 
 from async_class import AsyncObject
 
+
 class ARedisMock(AsyncObject):
     """
     A class that implements the interfaces exposed by the async redis driver.
     """
-    async def __ainit__(self,_host:str="localhost", _port:int=6379):
-        print("") 
+
+    async def __ainit__(self, _host: str = "localhost", _port: int = 6379):
+        print("")
         if _host:
             print(_host)
         if _port:

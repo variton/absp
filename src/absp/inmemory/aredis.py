@@ -12,17 +12,17 @@ class ARedis(AsyncObject):
 
     """
 
-    async def __ainit__(self,host:str,port:int,decode:bool=True) -> None:
+    async def __ainit__(self, host: str, port: int, decode: bool = True) -> None:
         self.host_ = host
         self.port_ = port
         self.decode_ = decode
         self.client_ = None
 
     async def connect(self) -> object:
-        self.client_ = redis.Redis(host=self.host_, 
-                                   port=self.port_, 
-                                   decode_responses=self.decode_)
-        return self.client_ 
+        self.client_ = redis.Redis(
+            host=self.host_, port=self.port_, decode_responses=self.decode_
+        )
+        return self.client_
 
     async def insert(self, **kwargs: Any) -> None:
         """
@@ -32,8 +32,8 @@ class ARedis(AsyncObject):
         ----------
         **kwargs : dict
         """
-        key, value = next(iter(kwargs.items())) 
-        await self.client_.set(key,value)
+        key, value = next(iter(kwargs.items()))
+        await self.client_.set(key, value)
 
     async def find(self, key: str) -> bool:
         """
@@ -65,7 +65,7 @@ class ARedis(AsyncObject):
         _value : Any
             The value for the new data to set.
         """
-        await self.client_.set(key,value)
+        await self.client_.set(key, value)
 
     async def delete(self, *keys: str) -> None:
         """
