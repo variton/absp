@@ -2,16 +2,12 @@
 
 set -euo pipefail
 
-cd /absp
-
 export HOME=/tmp
 export XDG_CACHE_HOME=/tmp/.cache
 export UV_CACHE_DIR=/tmp/.uv-cache
 export PYTHONDONTWRITEBYTECODE=1
-export COVERAGE_FILE=/absp/reports/.coverage
+export COVERAGE_FILE=reports/.coverage
 
-
-echo
 echo "=== [0/4] Project installation ==="
 uv sync
 
