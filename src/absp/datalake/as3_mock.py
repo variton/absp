@@ -6,13 +6,15 @@ from typing import Any, List
 
 from async_class import AsyncObject
 
+
 class AS3Mock(AsyncObject):
     """
     A class that implements the interfaces exposed by the async aws S3 driver.
     """
-    async def __ainit__(self,_bucket:str="", _client: object=None):
+
+    async def __ainit__(self, _bucket: str = "", _client: object = None):
         print("")
-        if _bucket != "" :
+        if _bucket != "":
             print(_bucket)
 
     async def connect(self) -> bool:

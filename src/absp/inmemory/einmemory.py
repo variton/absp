@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 class EInMemory(Enum):
     """Enum to specify the type of in memory store."""
 

@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 class EDataLake(Enum):
     """Enum to specify the type of database."""
 

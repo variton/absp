@@ -2,6 +2,7 @@
 
 from functools import partial
 
+
 class IAbsp:
     """Interface to create & use absp store packages.
 
@@ -23,20 +24,22 @@ class IAbsp:
         from absp.datalake.idatalake import IDataLake
         from absp.datalake.edatalake import EDataLake
 
-        self.mapper_ = {"mongo": partial(IDb().get, EDb.MGDB),
-                        "rmock": partial(IInMemory().get, EInMemory.RMOCK),
-                        "s3": partial(IDataLake().get, EDataLake.S3),
-                        "redis": partial(IInMemory().get, EInMemory.REDIS)}
+        self.mapper_ = {
+            "mongo": partial(IDb().get, EDb.MGDB),
+            "rmock": partial(IInMemory().get, EInMemory.RMOCK),
+            "s3": partial(IDataLake().get, EDataLake.S3),
+            "redis": partial(IInMemory().get, EInMemory.REDIS),
+        }
 
-    async def get(self, _interface : str, *args) -> object:
+    async def get(self, _interface: str, *args) -> object:
         """Instance the store asynchronously.
 
         Parameter
         ---------
-        _interface: a store interface 
+        _interface: a store interface
 
         *args:
-            arguments needed to create the store 
+            arguments needed to create the store
 
         Raises
         -------

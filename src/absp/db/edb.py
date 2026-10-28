@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 class EDb(Enum):
     """Enum to specify the type of database."""
 
