@@ -1,7 +1,5 @@
 """redis module."""
 
-from typing import Any
-
 import redis.asyncio as redis
 from async_class import AsyncObject
 
@@ -24,7 +22,19 @@ class ARedis(AsyncObject):
         )
         return self.client_
 
-    async def insert(self, **kwargs: Any) -> None:
+    async def assign(self, key: str,**kwargs: object) -> None:
+        """
+        insert a bulk of data into Redis storage.
+
+        Parameters
+        ----------
+        key : str
+        **kwargs : dict [json]
+        Not implemented yet
+        """
+        pass
+
+    async def insert(self, **kwargs: object) -> None:
         """
         Set data into the Redis storage.
 
@@ -50,7 +60,7 @@ class ARedis(AsyncObject):
         """
         return await self.client_.get(_key)
 
-    async def update(self, **kwargs: Any) -> None:
+    async def update(self, **kwargs: object) -> None:
         """Not implemented for this class."""
         pass
 
