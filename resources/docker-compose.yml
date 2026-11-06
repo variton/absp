@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:8.6-alpine
+    image: ghcr.io/variton/iredis:1.0
     container_name: redis
     ports:
       - "6379:6379"
