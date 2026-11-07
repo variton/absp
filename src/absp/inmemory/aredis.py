@@ -22,7 +22,7 @@ class ARedis(AsyncObject):
         )
         return self.client_
 
-    async def assign(self, key: str,**kwargs: object) -> None:
+    async def assign(self, key: str, **kwargs: object) -> None:
         """
         insert a bulk of data into Redis storage.
 
