@@ -6,7 +6,7 @@ from functools import partial
 class IAbsp:
     """Interface to create & use absp store packages.
 
-    Methods
+    Notes
     -------
     __init__()
         Set the init state of object
@@ -34,16 +34,16 @@ class IAbsp:
     async def get(self, _interface: str, *args) -> object:
         """Instance the store asynchronously.
 
-        Parameter
-        ---------
-        _interface: a store interface
-
-        *args:
-            arguments needed to create the store
+        Parameters
+        ----------
+        _interface : IStore
+            A store interface.
+        *args
+            Arguments needed to create the store.
 
         Raises
-        -------
+        ------
         KeyError
-            if the key doesn't exist
+            If the key doesn't exist.
         """
         return await self.mapper_[_interface](*args)
